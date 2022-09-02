@@ -1,0 +1,8 @@
+netty:
+  port: 8111
+spring:
+  application:
+    name: jt808-tcp-netty
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017/mongo?authSource=admin

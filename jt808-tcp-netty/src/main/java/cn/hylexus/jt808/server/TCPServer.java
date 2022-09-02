@@ -20,7 +20,12 @@ import io.netty.channel.socket.nio.NioServerSocketChannel;
 import io.netty.handler.codec.DelimiterBasedFrameDecoder;
 import io.netty.handler.timeout.IdleStateHandler;
 import io.netty.util.concurrent.Future;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+@Component
 public class TCPServer {
 
 	private Logger log = LoggerFactory.getLogger(getClass());
@@ -28,6 +33,7 @@ public class TCPServer {
 
 	private EventLoopGroup bossGroup = null;
 	private EventLoopGroup workerGroup = null;
+	@Value("${netty.port}")
 	private int port;
 
 	public TCPServer() {
@@ -57,7 +63,7 @@ public class TCPServer {
 						// ch.pipeline().addLast(new PackageDataDecoder());
 						ch.pipeline().addLast(new TCPServerHandler());
 					}
-				}).option(ChannelOption.SO_BACKLOG, 128) //
+				}).option(ChannelOption.SO_BACKLOG, 1024) //128
 				.childOption(ChannelOption.SO_KEEPALIVE, true);
 
 		this.log.info("TCP服务启动完毕,port={}", this.port);
@@ -65,7 +71,7 @@ public class TCPServer {
 
 		channelFuture.channel().closeFuture().sync();
 	}
-
+    @PostConstruct
 	public synchronized void startServer() {
 		if (this.isRunning) {
 			throw new IllegalStateException(this.getName() + " is already started .");
@@ -81,7 +87,7 @@ public class TCPServer {
 			}
 		}, this.getName()).start();
 	}
-
+    @PreDestroy
 	public synchronized void stopServer() {
 		if (!this.isRunning) {
 			throw new IllegalStateException(this.getName() + " is not yet started .");
@@ -110,8 +116,8 @@ public class TCPServer {
 	}
 
 	public static void main(String[] args) throws Exception {
-		TCPServer server = new TCPServer(20048);
-		server.startServer();
+//		TCPServer server = new TCPServer(20048);
+//		server.startServer();
 
 		// Thread.sleep(3000);
 		// server.stopServer();
